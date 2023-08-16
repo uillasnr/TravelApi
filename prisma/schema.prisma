@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////Dados que vao ser enseridos no banco de dados
+//todos dados da viagem
+model Trip {
+  id          String            @id @default(uuid())
+  name        String
+  location    String
+  startDate   DateTime
+  endDate     DateTime
+  pricePerDay Decimal           @db.Decimal(8, 2)
+  description String
+  coverImage  String
+  imagesUrl   String[]
+  highlihts   String[]
+  maxGuests   Int
+  resevations TripReservation[]
+}
+
+//Dados da reserva da viagem
+model TripReservation {
+  id        String   @id @default(uuid())
+  tripId    String
+  trip      Trip     @relation(fields: [tripId], references: [id]) //este campo esta fazendo relacionamento com a tabela das viagens Trips
+  userId    String
+  user      User     @relation(fields: [userId], references: [id]) //este campo esta fazendo relacionamento com a tabela das useuario User
+  startDate DateTime
+  endDate   DateTime
+  totalPaid Decimal  @db.Decimal(8, 2)
+}
+
+//dados do usuario
+model User {
+  id           String            @id @default(uuid())
+  reservations TripReservation[]
+}
