@@ -1,13 +1,14 @@
 
-import { prismaClient as prisma } from "../../database/prisma"; // Alterar o nome da importação
+import { prismaClient as prisma } from "../../database/prisma";
 
-class ControllerTrip {
+class TripController {
     async store(request, response) {
 
         try {
             const {
                 name, location, startDate, endDate, pricePerDay, description,
-                coverImage, imagesUrl, highlights, maxGuests,
+                coverImage, imagesUrl, highlihts, maxGuests, countryCode,
+                recommended
             } = request.body;
 
             const trip = await prisma.trip.create({
@@ -20,8 +21,10 @@ class ControllerTrip {
                     description,
                     coverImage,
                     imagesUrl,
-                    highlights,
+                    highlihts,
                     maxGuests,
+                    countryCode,
+                    recommended
                 },
             });
 
@@ -48,7 +51,7 @@ class ControllerTrip {
 
 }
 
-export default new ControllerTrip();
+export default new TripController();
 
 
 

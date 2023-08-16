@@ -25,6 +25,8 @@ model Trip {
   highlihts   String[]
   maxGuests   Int
   resevations TripReservation[]
+  countryCode String?
+  recommended Boolean           @default(false)
 }
 
 //Dados da reserva da viagem
@@ -41,6 +43,13 @@ model TripReservation {
 
 //dados do usuario
 model User {
-  id           String            @id @default(uuid())
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  admin      Boolean  @default(false) // Padrão é false para usuários comuns
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
   reservations TripReservation[]
 }
