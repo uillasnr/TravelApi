@@ -1,22 +1,20 @@
 
 import { prismaClient as prisma } from "../../database/prisma";
 
-
-
 class TripReservationController {
     async store(request, response) {
         try {
-            const { tripId,userId, startDate, endDate } = request.body;
+            const { tripId, userId, startDate, endDate, totalPaid } = request.body;
 
             // Verifica se já existe uma reserva entre as datas informadas para a viagem
             const reservationsBetweenDates = await prisma.tripReservation.findMany({
                 where: {
                     tripId,
                     startDate: {
-                        lte: new Date(startDate)
+                        lte: new Date(endDate)
                     },
                     endDate: {
-                        gte: new Date(endDate)
+                        gte: new Date(startDate)
                     }
                 }
             });
@@ -28,29 +26,31 @@ class TripReservationController {
                 });
             }
 
-            // Caso contrário, busca o usuário que fez a reserva
-            const reservationUser = await prisma.user.findUnique({
-                where: {
-                    id: userId // Supondo que o ID do usuário seja passado na requisição
+            // Caso contrário, cria a reserva
+            const newReservation = await prisma.tripReservation.create({
+                data: {
+                    trip: { connect: { id: tripId } },
+                    user: { connect: { id: userId } },
+                    startDate: new Date(startDate),
+                    endDate: new Date(endDate),
+                    totalPaid
                 }
             });
 
-            // Retorna a reserva e o usuário que fez a reserva
+            // Retorna a reserva criada
             return response.status(200).json({
-                reservation: reservationsBetweenDates,
-                user: reservationUser
+                reservation: newReservation
             });
         } catch (error) {
-            console.error('Erro ao verificar reserva:', error);
-            return response.status(500).json({ error: 'Ocorreu um erro ao verificar a reserva.' });
+            console.error('Erro ao criar reserva:', error);
+            return response.status(500).json({ error: 'Ocorreu um erro ao criar a reserva.' });
         }
-
     }
 
-     // Essa rota retorna todos as Trips
-     async index(request, response) {
+    // Essa rota retorna todos as Trips
+    async index(request, response) {
         try {
-            const tripReservation = await prisma.tripReservation.findMany(); // Usar o método findMany para buscar todos os registros
+            const tripReservation = await prisma.tripReservation.findMany(); 
 
             return response.json(tripReservation);
         } catch (error) {

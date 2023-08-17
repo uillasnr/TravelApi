@@ -1,15 +1,30 @@
-import { Router } from "express"
-import TripController from "./app/controllers/TripController"
-import TripReservation from "./app/controllers/TripReservationController"
-import UserController from "./app/controllers/UserController"
+// Rotas e configuração geral
+import { Router } from "express";
+import multerConfig from "../src/app/config/multer";
 
-const router = Router()
-router.post('/user', UserController.store)
+import TripController from "./app/controllers/TripController";
+import TripReservation from "./app/controllers/TripReservationController";
+import UserController from "./app/controllers/UserController";
 
-router.post('/Trips', TripController.store)
-router.get('/Trips', TripController.index)
+const router = Router();
+const upload = (multerConfig); // Talvez precise usar 'upload' em vez de '(multerConfig)' aqui
 
-router.post('/TripReservation', TripReservation.store)
-router.get('/TripReservation', TripReservation.index)
+// Rota para criação de usuário
+router.post('/user', UserController.store);
 
-export default router
+// Rota para criação de viagem
+router.post('/Trips', upload.fields([
+    { name: 'coverImage', maxCount: 1 },
+    { name: 'imagesUrl', maxCount: 2 }
+]), TripController.store);
+
+// Rota para listagem de viagens
+router.get('/Trips', TripController.index);
+
+// Rota para reserva de viagem
+router.post('/TripReservation', TripReservation.store);
+
+// Rota para listar reservas de viagens
+router.get('/TripReservation', TripReservation.index);
+
+export default router;
