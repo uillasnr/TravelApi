@@ -36,11 +36,12 @@ class TripReservationController {
                     totalPaid
                 }
             });
-
+            console.log(newReservation)
             // Retorna a reserva criada
             return response.status(200).json({
                 reservation: newReservation
             });
+           
         } catch (error) {
             console.error('Erro ao criar reserva:', error);
             return response.status(500).json({ error: 'Ocorreu um erro ao criar a reserva.' });
