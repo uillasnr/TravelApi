@@ -8,17 +8,17 @@ import TripReservation from "./app/controllers/TripReservationController";
 import UserController from "./app/controllers/UserController";
 
 const router = Router();
-const upload = multer(multerConfig);; // Talvez precise usar 'upload' em vez de '(multerConfig)' aqui
+//const upload = multer(multerConfig);; // Talvez precise usar 'upload' em vez de '(multerConfig)' aqui
 
 // Rota para criação de usuário
 router.post('/user', UserController.store);
 
-//router.post('/Trips', TripController.store);
+router.post('/Trips', TripController.store);
 // Rota para criação de viagem
- router.post('/Trips', upload.fields([
+/*  router.post('/Trips', upload.fields([
     { name: 'coverImage', maxCount: 1 },
     { name: 'imagesUrl', maxCount: 2 }
-]), TripController.store); 
+]), TripController.store);  */
 
 // Rota para listagem de viagens
 router.get('/Trips', TripController.index);
