@@ -35,7 +35,7 @@ class AuthController {
                         admin: user.admin
                     },
                     process.env.Token_key,
-                    { expiresIn: "2h" }
+                    { expiresIn: "1D" }
                 );
 
                 // Retorna o usuário (sem a senha) e o token na resposta
