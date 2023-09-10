@@ -22,7 +22,7 @@ model Trip {
   description String
   coverImage  String
   imagesUrl   String[]
-  highlihts   String[]
+  highlihts   Json[]
   maxGuests   Int
   resevations TripReservation[]
   countryCode String?

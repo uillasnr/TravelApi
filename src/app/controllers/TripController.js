@@ -1,36 +1,45 @@
-import { prismaClient as prisma } from "../../database/prisma"; // Alterar o nome da importação
+import { prismaClient as prisma } from "../../database/prisma";
 
 class ControllerTrip {
     async store(request, response) {
 
         try {
-            const {
-                name, location, startDate, endDate, pricePerDay, description,
-                highlihts, maxGuests, countryCode, recommended,    coverImage, imagesUrl
-            } = request.body;
+            const { name, location, startDate, endDate, pricePerDay, description,
+                highlihts, maxGuests, countryCode, recommended } = request.body;
 
-           // const coverImagePaths = request.files.coverImage[0].filename;
-           // const imagesUrlPaths = request.files.imagesUrl.map(file => file.filename);
 
-            // Agora você pode usar 'coverImage' e 'imagesUrl' ao criar a viagem no banco de dados.
+            const coverImage = request.files.coverImage[0].filename;
+            const imagesUrl = JSON.parse(request.body.imagesUrl);
 
+            // URL base do seu servidor
+            const baseUrl = 'http://localhost:3001';
+            const coverImageUrl = `${baseUrl}/uploads/${coverImage}`;
+
+
+            // Formate as datas para o formato ISO-8601
+            const isoStartDate = new Date(startDate).toISOString();
+            const isoEndDate = new Date(endDate).toISOString();
+
+
+            const highlihtsArray = Array.isArray(highlihts) ? highlihts : JSON.parse(highlihts);
 
             const trip = await prisma.trip.create({
                 data: {
                     name,
                     location,
-                    startDate,
-                    endDate,
+                    startDate: isoStartDate,
+                    endDate: isoEndDate,
                     pricePerDay,
                     description,
-                    coverImage,
+                    coverImage: coverImageUrl,
                     imagesUrl,
-                    highlihts,
-                    maxGuests,
+                    highlihts: highlihtsArray,
+                    maxGuests: parseInt(maxGuests),
                     countryCode,
-                    recommended
+                    recommended: recommended === 'true',
                 },
             });
+
 
             console.log(trip);
 
@@ -41,6 +50,30 @@ class ControllerTrip {
         }
 
     }
+
+    // Método para buscar uma viagem pelo ID
+    async show(request, response) {
+        try {
+            const { Id } = request.params; // Captura o ID da viagem da URL
+
+            const trip = await prisma.trip.findUnique({
+                where: {
+                    id: Id,
+                },
+            });
+
+            if (!trip) {
+                return response.status(404).json({ error: "Trip not found" });
+            }
+
+            return response.json(trip);
+        } catch (error) {
+            console.error("Error retrieving trip by ID:", error);
+            return response.status(500).json({ error: "An error occurred while retrieving the trip." });
+        }
+    }
+
+
     // Essa rota retorna todos as Trips
     async index(request, response) {
         try {
