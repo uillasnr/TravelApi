@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"] //text Search
 }
 
 datasource db {
@@ -10,8 +11,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//////////////////////////////////Dados que vao ser enseridos no banco de dados
-//todos dados da viagem
+model Category {
+  id         String @id @default(uuid())
+  name       String
+  coverImage String
+  Trip       Trip[]
+}
+
 model Trip {
   id          String            @id @default(uuid())
   name        String
@@ -27,6 +33,8 @@ model Trip {
   resevations TripReservation[]
   countryCode String?
   recommended Boolean           @default(false)
+  category    Category          @relation(fields: [categoryId], references: [id])
+  categoryId  String
 }
 
 //Dados da reserva da viagem
