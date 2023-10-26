@@ -139,6 +139,25 @@ class ControllerTrip {
     }
   }
 
+  async getTripsInDestiny(request, response) {
+    try {
+      // Consulta no banco de dados para obter as viagens no Brasil
+      const tripsInDestiny = await prisma.trip.findMany({
+        where: {
+          countryCode: 'BR', 
+        },
+      });
+  
+      return response.json(tripsInDestiny);
+    } catch (error) {
+      console.error("Error retrieving trips in Brazil:", error);
+      return response
+        .status(500)
+        .json({ error: "An error occurred while retrieving trips in Brazil." });
+    }
+  }
+  
+
   // Método para buscar uma viagem pelo ID
   async show(request, response) {
     try {

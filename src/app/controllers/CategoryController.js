@@ -43,6 +43,38 @@ class CategoryController {
     }
   }
 
+  async getTripsByCategory(request, response) {
+    try {
+      const { categoryId } = request.params;
+ 
+      // Verifica se a categoria com o ID especificado existe
+      const existingCategory = await prisma.category.findUnique({
+        where: {
+          id: categoryId.toString(),
+        },
+      });
+  
+      if (!existingCategory) {
+        return response.status(404).json({ error: "Category not found" });
+      }
+  
+      // obter as viagens associadas a essa categoria
+      const tripsInCategory = await prisma.trip.findMany({
+        where: {
+          categoryId: categoryId.toString(),
+        },
+      });
+  
+      return response.json(tripsInCategory);
+    } catch (error) {
+      console.error("Error getting trips by category:", error);
+      return response
+        .status(500)
+        .json({ error: "An error occurred while getting trips by category." });
+    }
+  }
+  
+
   async update(request, response) {
     try {
       const { id } = request.params;

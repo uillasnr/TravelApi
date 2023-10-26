@@ -33,6 +33,7 @@ router.get('/Trips/:Id', TripController.show); // Detalhes de uma viagem por ID
 router.delete('/Trips/:Id', TripController.delete); // Excluir uma viagem por ID
 // Rota para pesquisa de viagens por nome, data de início e orçamento
 router.get('/Busca', TripController.findByName);
+router.get('/Destino', TripController.getTripsInDestiny); //obter as viagens com base no destino
 
 
 
@@ -52,6 +53,6 @@ router.post('/Payment', verifyToken, PaymentController.Payment);
 router.post("/criar-category", CategoryController.store); // Criar categoria
 router.get("/category", CategoryController.index); // Listar categorias
 router.put("/category/:id", upload.fields([{ name: 'coverImage', maxCount: 1 }]), CategoryController.update); // Atualizar categoria
-
+router.get("/category/:categoryId", CategoryController.getTripsByCategory);
 
 export default router;
