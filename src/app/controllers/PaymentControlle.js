@@ -1,13 +1,12 @@
-import { prismaClient as prisma } from "../../database/prisma";
-//import bodyParser from 'body-parser';
-import rawBody from 'raw-body';
+/* import { prismaClient as prisma } from "../../database/prisma";
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
+
+ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2023-08-16"
 });
 
-class PaymentControlle {
-    async Payment(request, response) {
+class PaymentControlle { */
+/*     async Payment(request, response) {
         try {
             const { tripId, startDate, endDate, totalPaid } = request.body;
 
@@ -21,6 +20,7 @@ class PaymentControlle {
             // Efetue o pagamento usando o Stripe
             const session = await stripe.checkout.sessions.create({
                 success_url: "http://localhost:3000/",
+                cancel_url: "http://localhost:3000/uillas",
                 line_items: [
                     {
                         price_data: {
@@ -37,7 +37,7 @@ class PaymentControlle {
                 ],
                 mode: "payment",
             });
-
+            console.log(response);
             // Retorne a URL de redirecionamento para o cliente
             return response.status(200).json({ session: session.id });
 
@@ -50,33 +50,18 @@ class PaymentControlle {
 
 
     async stripeWebhookHandler(request, response) {
-        const rawBody = require('raw-body');
-       // Certifique-se de que o corpo bruto da solicitação seja tratado corretamente
-       const buffer = await rawBody(request);
+        // Certifique-se de que o corpo bruto da solicitação seja tratado corretamente
+    
         const sig = request.headers['stripe-signature'];
-        // console.log(buffer)
 
-        // Aqui você deve verificar a notificação ou webhook do Stripe para confirmar o pagamento bem-sucedido.
-        // Se o pagamento for confirmado com sucesso, crie a reserva no banco de dados.
-
-        // Exemplo de como você pode verificar a notificação do Stripe:
+        // Verifique a assinatura do webhook para garantir que a solicitação seja legítima
         const event = stripe.webhooks.constructEvent(
-            buffer,
             sig,
             process.env.STRIPE_WEBHOOK_SECRET_KEY
         );
 
-        console.log("Essssssssssssssssssssssssssssssssssssssssssssssste eo evento foguete ", event);
-        // const sig = request.headers['stripe-signature'];
-        // const body = request.rawBody; // Certifique-se de que o corpo bruto da solicitação seja tratado corretamente
-
-        //  const event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET_KEY);
-
-
-
-
-        // Verifique se o pagamento foi processado com sucesso
-         if (event.type === 'checkout.session.completed') {
+        // Verifique o tipo de evento
+        if (event.type === 'checkout.session.completed') {
             // Obtenha os dados da reserva a partir do evento
             const session = event.data.object;
             const tripId = session.metadata.tripId;
@@ -98,7 +83,7 @@ class PaymentControlle {
                         totalPaid,
                     },
                 });
-                console.log(response)
+
                 // Retorne uma resposta JSON com o status 200 e a reserva criada
                 return response.status(200).json({ reservation: newReservation });
             } catch (error) {
@@ -108,15 +93,14 @@ class PaymentControlle {
         } else {
             // Retorne uma resposta JSON com o status 200
             return response.status(200).json({ message: 'Payment processed.' });
-        } 
+        }
     }
-
 }
 
-export default new PaymentControlle();
+export default new PaymentControlle();  */
 
 
-/* try {
+ /* try {
     const sig = request.headers['stripe-signature'];
     const body = request.rawBody; // Certifique-se de que o corpo bruto da solicitação seja tratado corretamente
 
@@ -142,10 +126,10 @@ export default new PaymentControlle();
     console.error('Erro no tratamento do webhook do Stripe:', error);
     response.status(500).json({ error: 'Erro ocorreu ao lidar com o webhook do Stripe.' });
   }
-}
- */
-
-/* import { prismaClient as prisma } from "../../database/prisma";
+} */
+ 
+//criar a reserva sem o webhook do Stripe
+  import { prismaClient as prisma } from "../../database/prisma";
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2023-08-16"
@@ -206,4 +190,4 @@ class PaymentControlle {
     }
 }
 
-export default new PaymentControlle(); */
+export default new PaymentControlle();  

@@ -16,7 +16,7 @@ const router = Router();
 const upload = multer(multerConfig);
 
 // Rota para criação de usuário
-router.post('/user', UserController.store);
+router.post('/cadastre-se', UserController.store);
 router.post("/login", AuthController.store)
 
 
@@ -48,11 +48,13 @@ router.delete('/Reservation/:reservationId', verifyToken, TripReservation.delete
 
 // Rota para pagamento
 router.post('/Payment', verifyToken, PaymentController.Payment);
+//router.post('/stripe-webhook',  PaymentController.stripeWebhookHandler);
 
 // Rota para gerenciar categorias
-router.post("/criar-category", CategoryController.store); // Criar categoria
-router.get("/category", CategoryController.index); // Listar categorias
-router.put("/category/:id", upload.fields([{ name: 'coverImage', maxCount: 1 }]), CategoryController.update); // Atualizar categoria
-router.get("/category/:categoryId", CategoryController.getTripsByCategory);
+router.post("/criar-category", upload.fields([{ name: 'coverImage', maxCount: 1 }]), CategoryController.store); // Criar categoria
+router.get("/category", CategoryController.index); // Listar todas categorias
+router.put("/Update-category/:id", upload.fields([{ name: 'coverImage', maxCount: 1 }]), CategoryController.update); // Atualizar categoria
+router.get("/category/:categoryId", CategoryController.getTripsByCategory); //viagens associadas a uma categoria
+router.get("/mostrar-category/:id", CategoryController.getCategoryById); //mostrar uma categoria com base no seu ID
 
 export default router;
