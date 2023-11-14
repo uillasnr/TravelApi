@@ -157,7 +157,6 @@ class ControllerTrip {
     }
   }
   
-
   // Método para buscar uma viagem pelo ID
   async show(request, response) {
     try {

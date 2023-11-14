@@ -43,6 +43,7 @@ class CategoryController {
     }
   }
 
+  //Buscar todas as viagens associadas a uma categoria específica 
   async getTripsByCategory(request, response) {
     try {
       const { categoryId } = request.params;
@@ -74,6 +75,30 @@ class CategoryController {
     }
   }
   
+  //mostrar uma categoria com base no seu ID
+  async getCategoryById(request, response) {
+    try {
+      const { id } = request.params;
+ 
+      // Verifica se a categoria com o ID especificado existe
+      const category = await prisma.category.findUnique({
+        where: {
+          id: id,
+        },
+      });
+  
+      if (!category) {
+        return response.status(404).json({ error: "Category not found" });
+      }
+  
+      return response.json(category);
+    } catch (error) {
+      console.error("Error getting category by ID:", error);
+      return response
+        .status(500)
+        .json({ error: "An error occurred while getting category by ID." });
+    }
+  }  
 
   async update(request, response) {
     try {
