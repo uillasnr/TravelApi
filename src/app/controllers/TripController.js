@@ -182,6 +182,8 @@ class ControllerTrip {
   }
 
   // Essa rota retorna todos as Trips
+  // Essa rota retorna todos as Trips
+
   async index(request, response) {
     try {
       const trips = await prisma.trip.findMany(); // Usar o método findMany para buscar todos os registros
