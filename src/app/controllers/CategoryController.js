@@ -1,8 +1,17 @@
 import { prismaClient as prisma } from "../../database/prisma";
+import * as Yup from 'yup';
 
 class CategoryController {
+
   async store(request, response) {
     try {
+      const schema = Yup.object().shape({
+        name: Yup.string().required(),
+      });
+
+      // Valide os dados de entrada
+      await schema.validate(request.body, { abortEarly: false });
+
       const { name } = request.body;
 
       // URL base do seu servidor
@@ -19,10 +28,13 @@ class CategoryController {
         },
       });
 
-      console.log(category);
-
       return response.status(201).json(category);
     } catch (error) {
+      // Trate os erros de validação do Yup
+      if (error instanceof Yup.ValidationError) {
+        return response.status(400).json({ error: "Erro de validação", messages: error.errors });
+      }
+
       console.error("Error creating category:", error);
       return response
         .status(500)
@@ -30,10 +42,10 @@ class CategoryController {
     }
   }
 
+  // Endpoint para obter todas as categorias
   async index(request, response) {
     try {
       const category = await prisma.category.findMany();
-
       return response.json(category);
     } catch (error) {
       console.error("Error retrieving category:", error);
@@ -43,29 +55,27 @@ class CategoryController {
     }
   }
 
-  //Buscar todas as viagens associadas a uma categoria específica 
+  //obter todas as viagens associadas a uma categoria específica
   async getTripsByCategory(request, response) {
     try {
       const { categoryId } = request.params;
- 
-      // Verifica se a categoria com o ID especificado existe
+
       const existingCategory = await prisma.category.findUnique({
         where: {
           id: categoryId.toString(),
         },
       });
-  
+
       if (!existingCategory) {
         return response.status(404).json({ error: "Category not found" });
       }
-  
-      // obter as viagens associadas a essa categoria
+
       const tripsInCategory = await prisma.trip.findMany({
         where: {
           categoryId: categoryId.toString(),
         },
       });
-  
+
       return response.json(tripsInCategory);
     } catch (error) {
       console.error("Error getting trips by category:", error);
@@ -74,23 +84,22 @@ class CategoryController {
         .json({ error: "An error occurred while getting trips by category." });
     }
   }
-  
-  //mostrar uma categoria com base no seu ID
+
+  //obter uma categoria com base no seu ID
   async getCategoryById(request, response) {
     try {
       const { id } = request.params;
- 
-      // Verifica se a categoria com o ID especificado existe
+
       const category = await prisma.category.findUnique({
         where: {
           id: id,
         },
       });
-  
+
       if (!category) {
         return response.status(404).json({ error: "Category not found" });
       }
-  
+
       return response.json(category);
     } catch (error) {
       console.error("Error getting category by ID:", error);
@@ -98,14 +107,20 @@ class CategoryController {
         .status(500)
         .json({ error: "An error occurred while getting category by ID." });
     }
-  }  
+  }
 
+  // update categoria existente
   async update(request, response) {
     try {
       const { id } = request.params;
       const { name } = request.body;
 
-      // Verifica se a categoria com o ID especificado existe
+      const schema = Yup.object().shape({
+        name: Yup.string().required(),
+      });
+
+      await schema.validate(request.body, { abortEarly: false });
+
       const existingCategory = await prisma.category.findUnique({
         where: {
           id: id,
@@ -131,9 +146,13 @@ class CategoryController {
 
       return response.json(updatedCategory);
     } catch (error) {
+      // Trate os erros de validação do Yup
+      if (error instanceof Yup.ValidationError) {
+        return response.status(400).json({ error: "Erro de validação", messages: error.errors });
+      }
+
       console.error("Error updating category:", error);
-      return response
-        .status(500)
+      return response.status(500)
         .json({ error: "An error occurred while updating the category." });
     }
   }

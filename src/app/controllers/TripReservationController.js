@@ -1,5 +1,5 @@
 import { prismaClient as prisma } from "../../database/prisma";
-import Jwt from "jsonwebtoken";
+import * as Yup from 'yup';
 
 // global para armazenar a reserva
 let globalReservation = null;
@@ -7,9 +7,20 @@ let globalReservation = null;
 class TripReservationController {
 
     async store(request, response) {
+
         try {
+            const schema = Yup.object().shape({
+                tripId: Yup.string().required(),
+                startDate: Yup.date(),
+                endDate: Yup.date(),
+                guests: Yup.string().required(),
+                totalPaid: Yup.string().required(),
+            });
+
+            await schema.validate(request.body, { abortEarly: false });
+
             const { tripId, startDate, endDate, totalPaid } = request.body;
-            const userId = request.user.id; // Agora o objeto 'user' está disponível devido ao middleware de autenticação.
+            const userId = request.user.id;
             const guests = parseInt(request.body.guests, 10); // Converte a string para um número inteiro
 
             // Verifica se já existe uma reserva entre as datas informadas para a viagem
@@ -62,68 +73,33 @@ class TripReservationController {
             return response.status(200).json({
                 reservation: newReservation
             });
+
         } catch (error) {
-            console.error('Erro ao criar reserva:', error);
-            return response.status(500).json({ error: 'Ocorreu um erro ao criar a reserva.' });
+            // Trate os erros de validação do Yup
+             if (error instanceof Yup.ValidationError) {
+                return response.status(400).json({ error: "Validation error", messages: error.errors });
+            } 
+
+            console.error('Error creating reservation:', error);
+            return response.status(500).json({ error: 'An error occurred while creating the reservation.' });
         }
     }
 
-
+// Verifique se os dados da reserva foram confirmados anteriormente
     async Confirmation(request, response) {
         try {
-            // Verifique se os dados da reserva foram confirmados anteriormente
             if (!globalReservation) {
-                return response.status(400).json({ error: "Dados da reserva não confirmados" });
+                return response.status(400).json({ error: "Reservation details not confirmed" });
             }
 
             // Exiba os detalhes da reserva temporária
             return response.status(200).json({ reservation: globalReservation });
 
         } catch (error) {
-            console.error('Erro ao buscar detalhes da reserva:', error);
-            return response.status(500).json({ error: 'Ocorreu um erro ao buscar detalhes da reserva.' });
+            console.error('Error fetching booking details:', error);
+            return response.status(500).json({ error: 'An error occurred while fetching reservation details.' });
         }
     }
-
- /*    async Reservation(request, response) {
-
-        try {
-            const { tripId, startDate, endDate, totalPaid } = request.body;
-            const userId = request.user.id; // Agora o objeto 'user' está disponível devido ao middleware de autenticação.
-            const guests = parseInt(request.body.guests, 10); // Converte a string para um número inteiro
-
-
-            const newReservation = await prisma.tripReservation.create({
-                data: {
-                    trip: { connect: { id: tripId } },
-                    user: { connect: { id: userId } },
-                    startDate: new Date(startDate),
-                    endDate: new Date(endDate),
-                    guests: guests,
-                    totalPaid
-                },
-                include: {
-                    trip: { select: { name: true, location: true, coverImage: true, countryCode: true, } },// Inclui apenas os campos 
-                    user: { select: { name: true, email: true } }  // Inclui apenas os campos 
-
-                }
-            });
-
-              // console.log(response)
-            // Retorna a reserva criada
-            return response.status(200).json({
-                reservation: newReservation
-            });
-
-        } catch (error) {
-            console.error('Erro ao criar reserva:', error);
-            return response.status(500).json({ error: 'Ocorreu um erro ao criar a reserva.' });
-        }
-    }
- */
-
-
-
 
     // Este método permite que um usuário veja sua própria reserva com base no seu ID user
     async show(request, response) {
@@ -146,15 +122,15 @@ class TripReservationController {
             });
 
             if (!reservation) {
-                return response.status(404).json({ error: "Reserva não encontrada" });
+                return response.status(404).json({ error: "Reservation not found" });
             }
 
             // Retorna a reserva do usuário
             return response.json(reservation);
 
         } catch (error) {
-            console.error('Erro ao obter reserva:', error);
-            return response.status(500).json({ error: 'Ocorreu um erro ao obter a reserva.' });
+            console.error('Error getting reservation:', error);
+            return response.status(500).json({ error: 'An error occurred while obtaining the reservation.' });
         }
     }
 
@@ -171,12 +147,10 @@ class TripReservationController {
             });
 
             if (!existingReservation) {
-                return response.status(404).json({ error: "Reserva não encontrada" });
+                return response.status(404).json({ error: "Reservation not found" });
             }
 
             // Verifique se o usuário que está tentando excluir a reserva é o proprietário da reserva
-
-           
             await prisma.tripReservation.delete({
                 where: {
                     id: reservationId,
@@ -186,13 +160,11 @@ class TripReservationController {
             return response.status(204).send();
 
         } catch (error) {
-            console.error('Erro ao excluir reserva:', error);
-            return response.status(500).json({ error: 'Ocorreu um erro ao excluir a reserva.' });
+            console.error('Error deleting reservation:', error);
+            return response.status(500).json({ error: 'An error occurred while deleting the reservation.' });
         }
     }
     
-
-
     // Essa rota retorna todos as Trips admin
     async index(request, response) {
         try {
