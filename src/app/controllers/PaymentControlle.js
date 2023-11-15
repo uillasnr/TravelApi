@@ -129,7 +129,7 @@ export default new PaymentControlle();  */
 } */
  
 //criar a reserva sem o webhook do Stripe
-  import { prismaClient as prisma } from "../../database/prisma";
+import { prismaClient as prisma } from "../../database/prisma";
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY, {
     apiVersion: "2023-08-16"

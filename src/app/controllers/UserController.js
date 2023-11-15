@@ -1,12 +1,23 @@
 import { prismaClient as prisma } from "../../database/prisma";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
+import * as Yup from 'yup';
 
 class UserController {
     async store(request, response) {
+
         try {
+            const schema = Yup.object().shape({
+                name: Yup.string().required(),
+                email: Yup.string().email().required(),
+                password: Yup.string().required().min(6),
+                admin: Yup.boolean(),
+            });
+
+            await schema.validate(request.body, { abortEarly: false });
+
             const { name, email, password, admin } = request.body;
 
-            //função para verificar se o usuario existe no banco de dados
+            // Verifique se o usuário já existe no banco de dados
             const existingUser = await prisma.user.findUnique({
                 where: {
                     email: email
@@ -30,6 +41,11 @@ class UserController {
 
             return response.status(201).json(user);
         } catch (error) {
+            // Trate os erros de validação do Yup
+            if (error instanceof Yup.ValidationError) {
+                return response.status(400).json({ error: "Erro de validação", messages: error.errors });
+            }
+
             console.error('Error creating user:', error);
             return response.status(500).json({ error: 'An error occurred while creating the user.' });
         }
