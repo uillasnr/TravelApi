@@ -36,9 +36,6 @@ router.get('/Busca', TripController.findByName);
 router.get('/Destino', TripController.getTripsInDestiny); //obter as viagens com base no destino
 
 
-
-
-
 // Rota para reserva de viagem
 router.post('/TripReservation', verifyToken, TripReservation.store);
 router.get('/Confirmation', verifyToken, TripReservation.Confirmation); // Confirmação de reserva
@@ -49,6 +46,7 @@ router.delete('/Reservation/:reservationId', verifyToken, TripReservation.delete
 // Rota para pagamento
 router.post('/Payment', verifyToken, PaymentController.Payment);
 //router.post('/stripe-webhook',  PaymentController.stripeWebhookHandler);
+
 
 // Rota para gerenciar categorias
 router.post("/criar-category", upload.fields([{ name: 'coverImage', maxCount: 1 }]), CategoryController.store); // Criar categoria

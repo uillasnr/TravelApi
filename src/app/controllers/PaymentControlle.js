@@ -150,6 +150,7 @@ class PaymentControlle {
             // Efetue o pagamento usando o Stripe
             const session = await stripe.checkout.sessions.create({
                 success_url: "http://localhost:3000/",
+                cancel_url: "http://localhost:3000/",
                 line_items: [
                     {
                         price_data: {

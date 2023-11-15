@@ -1,8 +1,28 @@
 import { prismaClient as prisma } from "../../database/prisma";
+import * as Yup from 'yup';
 
 class ControllerTrip {
   async store(request, response) {
+    
     try {
+      const schema = Yup.object().shape({
+        name: Yup.string().required(),
+        location: Yup.string().required(),
+        startDate: Yup.date().required(),
+        endDate: Yup.date().required(),
+        pricePerDay: Yup.number().required(),
+        description: Yup.string().required(),
+        coverImage: Yup.array().of(Yup.string()),
+        imagesUrl: Yup.array().of(Yup.string()),
+        highlihts: Yup.string().required(), 
+        maxGuests: Yup.number().required(),
+        countryCode: Yup.string(),
+        recommended: Yup.boolean().required(),
+        categoryId: Yup.string().required(),
+      });
+
+      await schema.validate(request.body, { abortEarly: false });
+
       const {
         name, location, startDate, endDate, pricePerDay, description,
         highlihts, maxGuests, countryCode, recommended, categoryId,
@@ -66,6 +86,11 @@ class ControllerTrip {
 
       return response.status(201).json(trip);
     } catch (error) {
+      // validação do Yup
+      if (error instanceof Yup.ValidationError) {
+        return response.status(400).json({ error: "Erro de validação", messages: error.errors });
+      }
+
       console.error("Error creating trip:", error);
       return response
         .status(500)
@@ -73,11 +98,11 @@ class ControllerTrip {
     }
   }
 
-  //  pesquisa trips
+  //  Pesquisa trips
   async findByName(request, response) {
     try {
       const { text, startDate, budget } = request.query;
-      console.log("uillas teste",text, startDate, budget );
+     
       if (!text) {
         return response
           .status(400)
@@ -109,7 +134,6 @@ class ControllerTrip {
         };
       }
 
-      console.log("startDate:", startDate);
       // opcional
       if (budget) {
         searchCriteria = {
@@ -182,11 +206,10 @@ class ControllerTrip {
   }
 
   // Essa rota retorna todos as Trips
-  // Essa rota retorna todos as Trips
-
   async index(request, response) {
     try {
-      const trips = await prisma.trip.findMany(); // Usar o método findMany para buscar todos os registros
+      // Usar o método findMany para buscar todos os registros
+      const trips = await prisma.trip.findMany(); 
 
       return response.json(trips);
     } catch (error) {
